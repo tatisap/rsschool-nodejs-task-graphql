@@ -45,6 +45,10 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       if (!['basic', 'business'].includes(body.memberTypeId)) {
         throw this.httpErrors.badRequest();
       }
+      const user = await this.db.users.findOne({ key: 'id', equals: body.userId });
+      if (!user) {
+        throw this.httpErrors.badRequest();
+      }
       const conflict = await this.db.profiles.findOne({ key: 'userId', equals: body.userId});
       if (conflict) {
         throw this.httpErrors.badRequest();

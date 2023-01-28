@@ -28,7 +28,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         throw this.httpErrors.notFound();
       }
       const user = await this.db.users.findOne({key: 'id', equals: id})
-      if(!user) {
+      if (!user) {
         throw this.httpErrors.notFound();
       }
       return user;
@@ -94,16 +94,20 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      const { body: { userId: id }, params: { id: userId } } = request;
+      const { body: { userId }, params: { id } } = request;
       if (!validate(id) || !validate(userId)) {
         throw this.httpErrors.badRequest();
       }
-      const user = await this.db.users.findOne({key: 'id', equals: id})
-      const userToFollow = await this.db.users.findOne({key: 'id', equals: userId})
-      if(!user || !userToFollow) {
+      const user = await this.db.users.findOne({key: 'id', equals: id});
+      const userToFollow = await this.db.users.findOne({key: 'id', equals: userId});
+      if (!user || !userToFollow) {
         throw this.httpErrors.notFound();
       }
-      return this.db.users.change(id, { subscribedToUserIds: [userId, ...user.subscribedToUserIds] });
+      if (userToFollow.subscribedToUserIds.includes(user.id)) {
+        throw this.httpErrors.unprocessableEntity();
+      }
+      return this.db.users.change(userId, { subscribedToUserIds: [id, ...userToFollow.subscribedToUserIds] });
+
     }
   );
 
@@ -116,15 +120,17 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      const { body: { userId: id }, params: { id: userId } } = request;
-      const user = await this.db.users.findOne({key: 'id', equals: id})
-      if (!user) {
+      const { body: { userId }, params: { id } } = request;
+      const userToUnfollow = await this.db.users.findOne({key: 'id', equals: userId})
+      if (!userToUnfollow) {
         throw this.httpErrors.notFound();
       }
-      if(!user.subscribedToUserIds.find((id) => id === userId)) {
+      if (!userToUnfollow.subscribedToUserIds.find((idFromList) => idFromList === id)) {
         throw this.httpErrors.badRequest();
       }
-      return this.db.users.change(id, { subscribedToUserIds: user.subscribedToUserIds.filter((id) => id !== userId) });
+      return this.db.users.change(userId, {
+        subscribedToUserIds: userToUnfollow.subscribedToUserIds.filter((idFromList) => idFromList !== id),
+      });
     }
   );
 
