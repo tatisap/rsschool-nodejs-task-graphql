@@ -1,9 +1,10 @@
 import { GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLID } from 'graphql';
 import DB from '../../../utils/DB/DB';
+import { UserEntity } from '../../../utils/DB/entities/DBUsers';
 import { postType } from './post.type';
 import { profileType } from './profile.type';
 
-export const userType: GraphQLObjectType = new GraphQLObjectType<any, DB>({
+export const userType: GraphQLObjectType = new GraphQLObjectType<UserEntity, DB>({
   name: 'User',
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLID) },
