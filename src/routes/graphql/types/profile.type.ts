@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLID } from 'graphql';
 import { ProfileEntity } from '../../../utils/DB/entities/DBProfiles';
+import { dataLoad } from '../load.data';
 import { memberType, memberTypeIdEnum } from './member.type';
 
 export const profileType: GraphQLObjectType = new GraphQLObjectType<ProfileEntity, FastifyInstance>({
@@ -17,7 +18,13 @@ export const profileType: GraphQLObjectType = new GraphQLObjectType<ProfileEntit
     userId: { type: new GraphQLNonNull(GraphQLString) },
     memberType: {
       type: memberType,
-      resolve: (profile, _a, { db }) => db.memberTypes.findOne({ key: 'id', equals: profile.memberTypeId }),
+      resolve: (profile, _a, { db, dataloaders }, { fieldNodes }) => {
+        const cb = async (memberTypeIds: string[]) => {
+          const memberTypes = await db.memberTypes.findMany({ key: 'id', equalsAnyOf: memberTypeIds });
+          return memberTypeIds.map((memberTypeId) => memberTypes.find((memberType) => memberType.id === memberTypeId));
+        }
+        return dataLoad(dataloaders, fieldNodes, cb, profile.memberTypeId);
+      }
     }
   }),
 });
