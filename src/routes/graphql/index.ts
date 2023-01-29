@@ -1,7 +1,8 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
-import { graphql } from 'graphql';
+import { graphql, parse, validate } from 'graphql';
 import { graphqlBodySchema } from './schema';
 import { schema } from './graphql.schema';
+import * as depthLimit from 'graphql-depth-limit';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -14,36 +15,23 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply) {
-    const { body } = request;
+      const { body } = request;
     
-    if (body.query) {
-      const response = await graphql({
+      const [validationError] = validate(schema, parse((body.query || body.mutation) as string), [depthLimit(5)], { maxErrors: 1 });
+      if (validationError) {
+        throw this.httpErrors.badRequest(validationError.message);
+      }
+      const { data, errors: executionErrors } = await graphql({
         schema,
         contextValue: this,
-        source: body.query,
-        variableValues: body.variables
+        source: (body.query || body.mutation) as string,
+        variableValues: body.variables,
       });
-      
-      if (response.errors) {
-        return response.errors;
+      if (executionErrors) {
+        const [firstError] = executionErrors;
+        throw this.httpErrors.badRequest(firstError.message);
       }
-      return response.data;
-    }
-
-    if (body.mutation) {
-      const response = await graphql({
-        schema,
-        contextValue: this.db,
-        source: body.mutation,
-        variableValues: body.variables
-      });
-
-      if (response.errors) {
-        return response.errors;
-      }
-      return response.data;
-    }
-
+      return data;
     }
   );
 };
