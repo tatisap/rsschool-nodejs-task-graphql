@@ -66,7 +66,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       }
       await this.db.users.delete(id);
 
-      const followings = await this.db.users.findMany({ key: 'subscribedToUserIds', equals: [user.id] });
+      const followings = await this.db.users.findMany({ key: 'subscribedToUserIds', inArray: user.id });
       await Promise.all(followings.map(async (following) => {
         return this.db.users.change(following.id, {subscribedToUserIds: following.subscribedToUserIds.filter((id) => id !== user.id)});
       }));
