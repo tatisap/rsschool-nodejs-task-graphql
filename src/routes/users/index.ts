@@ -98,6 +98,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       if (!validate(id) || !validate(userId)) {
         throw this.httpErrors.badRequest();
       }
+      if (userId === id) {
+        throw this.httpErrors.badRequest();
+      }
       const user = await this.db.users.findOne({key: 'id', equals: id});
       const userToFollow = await this.db.users.findOne({key: 'id', equals: userId});
       if (!user || !userToFollow) {
@@ -124,6 +127,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       const userToUnfollow = await this.db.users.findOne({key: 'id', equals: userId})
       if (!userToUnfollow) {
         throw this.httpErrors.notFound();
+      }
+      if (userId === id) {
+        throw this.httpErrors.badRequest();
       }
       if (!userToUnfollow.subscribedToUserIds.find((idFromList) => idFromList === id)) {
         throw this.httpErrors.badRequest();

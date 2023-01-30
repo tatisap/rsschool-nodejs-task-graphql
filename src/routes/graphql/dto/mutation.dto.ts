@@ -79,7 +79,7 @@ export const subscribeToUserDto = new GraphQLInputObjectType({
   name: 'SubscribeToUserDTO',
   fields: () => ({
     userId: { type: new GraphQLNonNull(GraphQLString) },
-    userToSibscribeId: { type: new GraphQLNonNull(GraphQLString) },
+    userToSubscribeId: { type: new GraphQLNonNull(GraphQLString) },
   }),
 });
 
@@ -87,6 +87,6 @@ export const unsubscribeFromUserDto = new GraphQLInputObjectType({
   name: 'UnsubscribeFromUserDTO',
   fields: () => ({
     userId: { type: new GraphQLNonNull(GraphQLString) },
-    userToUnsibscribeId: { type: new GraphQLNonNull(GraphQLString) },
+    userToUnsubscribeId: { type: new GraphQLNonNull(GraphQLString) },
   }),
 });

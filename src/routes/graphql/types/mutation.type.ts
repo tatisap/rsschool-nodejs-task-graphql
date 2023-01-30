@@ -98,7 +98,7 @@ export const mutationType: GraphQLObjectType = new GraphQLObjectType<any, Fastif
     updateMemberType: {
       type: memberType,
       args: {
-        postInfo: { type: updateMemberTypeDto },
+        memberTypeInfo: { type: updateMemberTypeDto },
       },
       resolve: async (_s, { memberTypeInfo: { id, ...info } }, { db }) => {
         if (!['basic', 'business'].includes(id)) {
@@ -112,9 +112,12 @@ export const mutationType: GraphQLObjectType = new GraphQLObjectType<any, Fastif
       args: {
         info: { type: subscribeToUserDto },
       },
-      resolve: async (_s, { userId, userToSubscribeId }, { db }) => {
+      resolve: async (_s, { info: { userId, userToSubscribeId } }, { db }) => {
         if (!validate(userToSubscribeId) || !validate(userId)) {
           throw new GraphQLError(`Id is not UUID`);
+        }
+        if (userId === userToSubscribeId) {
+          throw new GraphQLError(`User's id and user's to subscribe id can't be equal`);
         }
         const user = await db.users.findOne({key: 'id', equals: userId});
         const userToFollow = await db.users.findOne({key: 'id', equals: userToSubscribeId});
@@ -132,9 +135,12 @@ export const mutationType: GraphQLObjectType = new GraphQLObjectType<any, Fastif
       args: {
         info: { type: unsubscribeFromUserDto },
       },
-      resolve: async (_s, { userId, userToUnsubscribeId }, { db }) => {
+      resolve: async (_s, { info: { userId, userToUnsubscribeId } }, { db }) => {
         if (!validate(userToUnsubscribeId) || !validate(userId)) {
           throw new GraphQLError(`Id is not UUID`);
+        }
+        if (userId === userToUnsubscribeId) {
+          throw new GraphQLError(`User's id and user's to unsubscribe id can't be equal`);
         }
         const userToUnfollow = await db.users.findOne({key: 'id', equals: userToUnsubscribeId});
         if (!userToUnfollow) {

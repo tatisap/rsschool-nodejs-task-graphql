@@ -27,39 +27,39 @@ export const queryType: GraphQLObjectType = new GraphQLObjectType<any, FastifyIn
     },
     user: {
       type: userType,
-      args: { id: { type: new GraphQLNonNull(GraphQLString) } },
-      resolve: (_s, { id }, { db }) => {
-        if (!validate(id)) {
+      args: { userId: { type: new GraphQLNonNull(GraphQLString) } },
+      resolve: (_s, { userId }, { db }) => {
+        if (!validate(userId)) {
           throw new GraphQLError(`Id is not UUID`);
         }
-        return db.users.findOne({ key: 'id', equals: id  })
+        return db.users.findOne({ key: 'id', equals: userId })
       },
     },
     post: {
       type: postType,
-      args: { id: { type: new GraphQLNonNull(GraphQLString) } },
-      resolve: (_s, { id }, { db }) => {
-        if (!validate(id)) {
+      args: { postId: { type: new GraphQLNonNull(GraphQLString) } },
+      resolve: (_s, { postId }, { db }) => {
+        if (!validate(postId)) {
           throw new GraphQLError(`Id is not UUID`);
         }
-        return db.posts.findOne({ key: 'id', equals: id  })
+        return db.posts.findOne({ key: 'id', equals: postId })
       },
     },
     profile: {
       type: profileType,
-      args: { id: { type: new GraphQLNonNull(GraphQLString) } },
-      resolve: (_s, { id }, { db }) => {
-        if (!validate(id)) {
+      args: { profileId: { type: new GraphQLNonNull(GraphQLString) } },
+      resolve: (_s, { profileId }, { db }) => {
+        if (!validate(profileId)) {
           throw new GraphQLError(`Id is not UUID`);
         }
-        return db.profiles.findOne({ key: 'id', equals: id  })
+        return db.profiles.findOne({ key: 'id', equals: profileId })
       },
     },
     memberType: {
       type: memberType,
-      args: { id: { type: new GraphQLNonNull(memberTypeIdEnum) } },
-      resolve: (_s, { id }, { db }) => {
-        return db.memberTypes.findOne({ key: 'id', equals: id  })
+      args: { memberTypeId: { type: new GraphQLNonNull(memberTypeIdEnum) } },
+      resolve: (_s, { memberTypeId }, { db }) => {
+        return db.memberTypes.findOne({ key: 'id', equals: memberTypeId })
       },
     },
   }),
