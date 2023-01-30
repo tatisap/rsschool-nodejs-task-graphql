@@ -441,7 +441,6 @@
       }
       ```
 
-
       - Update memberType:
 
       ```graphql
